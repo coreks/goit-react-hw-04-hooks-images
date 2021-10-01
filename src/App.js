@@ -14,29 +14,29 @@ import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const [imageName, setImageName] = useState('');
-  const [hits, setHits] = useState([]);
+  const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState('idle');
-  const [selectedImage, setSelectedImage] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     if (!imageName) {
       return;
     }
-    async function getHits() {
+    async function getImages() {
       try {
         setStatus('pending');
 
-        const hits = await fetchImages(imageName, page);
+        const images = await fetchImages(imageName, page);
         setStatus('resolved');
 
-        if (hits.length === 0) {
+        if (!images.length) {
           return toast.error(
             `Picture with the name ${imageName} is not in the catalog`,
           );
         }
 
-        setHits(prevState => [...prevState, ...hits]);
+        setImages(prevState => [...prevState, ...images]);
         window.scrollTo({
           top: document.documentElement.scrollHeight,
           behavior: 'smooth',
@@ -46,12 +46,16 @@ function App() {
         console.error(error.message);
       }
     }
-    getHits();
+    getImages();
   }, [imageName, page]);
 
-  const handleFormSubmit = imageName => {
-    setImageName(imageName);
-    setHits([]);
+  const handleFormSubmit = newImageName => {
+    if (imageName === newImageName) {
+      return;
+    }
+
+    setImageName(newImageName);
+    setImages([]);
     setPage(1);
   };
 
@@ -64,20 +68,20 @@ function App() {
   };
 
   const handleCloseModal = () => {
-    setSelectedImage('');
+    setSelectedImage(null);
   };
+
+  const isShowButton = images.length > 0;
 
   return (
     <>
       <Searchbar onSubmit={handleFormSubmit} />
 
+      <ImageGallery images={images} handleSelectedImage={handleSelectedImage} />
+
       {status === 'pending' && <Spinner />}
 
-      {status === 'resolved' && (
-        <ImageGallery hits={hits} handleSelectedImage={handleSelectedImage} />
-      )}
-
-      {hits.length > 0 && <Button onClick={pageIncrement} />}
+      {isShowButton && <Button onClick={pageIncrement} />}
 
       {selectedImage && (
         <Modal

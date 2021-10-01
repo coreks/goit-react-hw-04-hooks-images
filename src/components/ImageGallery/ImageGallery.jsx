@@ -2,10 +2,10 @@ import PropTypes from 'prop-types';
 
 import ImageGalleryItem from '../ImageGalleryItem/ImageGalleryItem';
 
-const ImageGallery = ({ hits, handleSelectedImage }) => {
+const ImageGallery = ({ images, handleSelectedImage }) => {
   return (
     <ul className="ImageGallery">
-      {hits.map(({ id, webformatURL, tags, largeImageURL }) => (
+      {images.map(({ id, webformatURL, tags, largeImageURL }) => (
         <ImageGalleryItem
           key={id}
           webformatURL={webformatURL}
